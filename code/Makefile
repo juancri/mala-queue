@@ -1,4 +1,6 @@
 
 all:
-	npx uglify-js load.js > load.min.js
-	npx uglify-js run.js > run.min.js
+	rm -rf out
+	mkdir -p out
+	npx uglify-js load.js -o out/load.min.js
+	npx uglify-js run.js -o out/run.min.js
