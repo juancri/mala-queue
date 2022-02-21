@@ -1,0 +1,11 @@
+digraph G {
+  Autenticar[style="filled", fillcolor="#aaffaa"];
+  TraerTipoTicketsSectores[style="filled", fillcolor="#aaaaff"];
+  AgregarMultipleTickets[style="filled", fillcolor="#aaaaff"];
+  Pago[style="filled", fillcolor="#aaffaa"];
+
+  Autenticar -> TraerTipoTicketsSectores;
+  TraerTipoTicketsSectores -> AgregarMultipleTickets;
+  AgregarMultipleTickets -> Pago;
+}
+
