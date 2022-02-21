@@ -5,7 +5,7 @@
   {
     // Constantes
     const JC_EVENTO = 'biz175';
-    const JC_NUM_FECHA = 1;
+    const JC_NUM_FECHA = 2;
     const JC_VERSION = 1;
 
     // Funciones UI
