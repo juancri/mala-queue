@@ -1,3 +1,4 @@
 all:
-	dot -Tjpg process.dot > process.jpg
-
+	rm -rf out
+	mkdir out
+	dot -Tjpg process.dot > out/process.jpg
