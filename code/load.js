@@ -1,9 +1,9 @@
 
-(function () {
+(function (d) {
 	// Create new script element
-	const script = document.createElement('script');
-	script.src = '//juancri.com/puntoticket/run.min.js';
+	const s = d.createElement('script');
+	s.src = '//juancri.com/conejomalo/run.min.js';
 
 	// Append to the `head` element
-	document.head.appendChild(script);
-})();
+	d.head.appendChild(s);
+})(document)
