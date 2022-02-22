@@ -4,9 +4,9 @@
   try
   {
     // Constantes
+    const VERSION = 3;
     const EVENTO = 'biz175';
     const NUM_FECHA = 2;
-    const VERSION = 1;
     const TIPO_TICKET_ID_MIN = 10;
     const TIPO_TICKET_ID_MAX = 12;
     const BASE_FETCH_PARAMS = {
@@ -35,7 +35,7 @@
     };
 
     // Iniciar
-    await mostrarMensaje('Iniciando Mala Queue v' + VERSION);
+    await mostrarMensaje('Iniciando Mala Queue versión ' + VERSION);
 
     // Obtener ubicaciones disponibles
     const response1 = await fetch("/Compra/TraerTipoTicketsSectores", {
@@ -45,7 +45,7 @@
     if (response1.url.includes('Account/SignIn'))
     {
       console.log(response1);
-      mostrarMensaje('Inicia sesión antes de empezar');
+      mostrarMensaje('Inicia sesión e intenta nuevamente');
       window.location.href = 'https://www.puntoticket.com/Account/SignIn';
       return;
     }
@@ -57,10 +57,10 @@
 
     // Notificar disponibles
     if (!available.length) {
-      await mostrarMensaje('No quedan tickets disponibles');
+      await mostrarMensaje('No quedan tickets no numerados disponibles');
       return;
     }
-    await mostrarMensaje(`Hay ${available.length} secciones disponibles`);
+    await mostrarMensaje(`Hay ${available.length} secciones con tickets no numerados disponibles`);
 
     // Seleccionar ubicacion
     const selected = await seleccionar(
@@ -70,7 +70,7 @@
 
     // Verificar
     if (selected === undefined) {
-      await mostrarMensaje('No hay más secciones disponibles');
+      await mostrarMensaje('No hay más secciones de tickets no numerados disponibles');
       return;
     }
 
