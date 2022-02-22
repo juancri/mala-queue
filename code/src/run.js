@@ -4,9 +4,16 @@
   try
   {
     // Constantes
-    const JC_EVENTO = 'biz175';
-    const JC_NUM_FECHA = 2;
-    const JC_VERSION = 1;
+    const EVENTO = 'biz175';
+    const NUM_FECHA = 2;
+    const VERSION = 1;
+    const TIPO_TICKET_ID_MIN = 10;
+    const TIPO_TICKET_ID_MAX = 12;
+    const BASE_FETCH_PARAMS = {
+      headers: { "content-type": "application/json" },
+      method: "POST",
+      credentials: "include"
+    };
 
     // Funciones UI
     const mostrarMensaje = async (mensaje) =>
@@ -27,12 +34,13 @@
       return undefined;
     };
 
+    // Iniciar
+    await mostrarMensaje('Iniciando Mala Queue v' + VERSION);
+
     // Obtener ubicaciones disponibles
     const response1 = await fetch("/Compra/TraerTipoTicketsSectores", {
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ eventoID: JC_EVENTO, eventoCalendarioID: JC_NUM_FECHA }),
-      method: "POST",
-      credentials: "include"
+      ...BASE_FETCH_PARAMS,
+      body: JSON.stringify({ eventoID: EVENTO, eventoCalendarioID: NUM_FECHA })
     });
     if (response1.url.includes('Account/SignIn'))
     {
@@ -42,7 +50,10 @@
       return;
     }
     const body1 = JSON.parse(await response1.text());
-    const available = body1.TipoTickets.filter(x => x.Disponible === 1);
+    const available = body1.TipoTickets
+      .filter(x => x.Disponible === 1)
+      .filter(x => x.TipoTicketID >= TIPO_TICKET_ID_MIN)
+      .filter(x => x.TipoTicketID <= TIPO_TICKET_ID_MAX);
 
     // Notificar disponibles
     if (!available.length) {
@@ -76,10 +87,8 @@
 
     // Agregar al carrito
     const response2 = await fetch("/Compra/AgregarMultipleTickets", {
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ EventoID: JC_EVENTO, EventoCalendarioID: JC_NUM_FECHA, CategoriaTicketID: "1", Tickets: [{ TipoTicketID: jcTipoTicket, Cantidad: jcCantidadTickets }] }),
-      method: "POST",
-      credentials: "include"
+      ...BASE_FETCH_PARAMS,
+      body: JSON.stringify({ EventoID: EVENTO, EventoCalendarioID: NUM_FECHA, CategoriaTicketID: "1", Tickets: [{ TipoTicketID: jcTipoTicket, Cantidad: jcCantidadTickets }] })
     });
     const body2 = JSON.parse(await response2.text());
     if (!body2.Success)
@@ -88,6 +97,7 @@
       return;
     }
 
+    // Redirigir
     await mostrarMensaje('Se agregaron las entradas al carro de compras. Redirigiendo al pago.');
     window.location.href = '/Compra/Pago';
   } catch (e) {
