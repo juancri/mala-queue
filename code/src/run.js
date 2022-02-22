@@ -4,7 +4,7 @@
   try
   {
     // Constantes
-    const VERSION = 3;
+    const VERSION = 4;
     const EVENTO = 'biz175';
     const NUM_FECHA = 2;
     const TIPO_TICKET_ID_MIN = 10;
@@ -16,23 +16,54 @@
     };
 
     // Funciones UI
-    const mostrarMensaje = async (mensaje) =>
+    const crearDiv = (contenido) =>
     {
-      // FIXME: Cambiar
-      alert(mensaje);
+      const div = document.createElement('div');
+      div.style = 'position: absolute; z-index: 1000; left: 20px; top: 20px; right: 20px; bottom: 20px; background: blue; color: white; text-align:center; padding: 20px';
+      const container = document.createElement('div');
+      container.appendChild(contenido);
+      const button = document.createElement('button');
+      button.style = 'background: black; color: white;';
+      button.innerText = "OK";
+      div.appendChild(container);
+      div.appendChild(button);
+      document.body.appendChild(div);
+      return new Promise(resolve => {
+        button.onclick = () => {
+          document.body.removeChild(div);
+          resolve();
+        };
+      });
     };
-    const seleccionar = async (titulo, opciones, generarTexto) =>
+    const mostrarMensaje = (mensaje) =>
     {
-      // FIXME: Implementar correctamente
+      const span = document.createElement('span');
+      span.innerText = mensaje;
+      return crearDiv(span);
+    };
+    const seleccionar = async (titulo, opciones, generarValue, generarTexto) =>
+    {
+      const main = document.createElement('div');
+      const divTitulo = document.createElement('div');
+      divTitulo.innerText = titulo;
+      const select = document.createElement('select');
+      select.style = 'background: black; color: white';
       for (const opcion of opciones)
       {
-        const texto = generarTexto(opcion);
-        if (confirm(`${titulo}: ${texto}`))
-          return opcion;
+        const optionElement = document.createElement('option');
+        optionElement.style = 'background: black; color: white';
+        optionElement.innerText = generarTexto(opcion);
+        optionElement.setAttribute('value', generarValue(opcion));
+        select.appendChild(optionElement);
       }
-
-      return undefined;
+      main.appendChild(divTitulo);
+      main.appendChild(select);
+      await crearDiv(main);
+      return select.value;
     };
+
+    // Eliminar todo
+    document.body.innerHTML = '';
 
     // Iniciar
     await mostrarMensaje('Iniciando Mala Queue versión ' + VERSION);
@@ -44,8 +75,7 @@
     });
     if (response1.url.includes('Account/SignIn'))
     {
-      console.log(response1);
-      mostrarMensaje('Inicia sesión e intenta nuevamente');
+      await mostrarMensaje('Inicia sesión e intenta nuevamente');
       window.location.href = 'https://www.puntoticket.com/Account/SignIn';
       return;
     }
@@ -63,32 +93,30 @@
     await mostrarMensaje(`Hay ${available.length} secciones con tickets no numerados disponibles`);
 
     // Seleccionar ubicacion
-    const selected = await seleccionar(
+    const jcTipoTicket = await seleccionar(
       'Sección',
       available,
+      seccion => seccion.TipoTicketID,
       seccion => `${seccion.TipoTicket} (${seccion.Precio})`);
 
-    // Verificar
-    if (selected === undefined) {
-      await mostrarMensaje('No hay más secciones de tickets no numerados disponibles');
-      return;
-    }
-
-    // Obtener tipo
-    const jcTipoTicket = selected.TipoTicketID;
-
     // Confirmar cantidad
-    const jcCantidadTickets = await seleccionar('Cantidad de entradas', [1, 2], x => x.toString());
-    if (jcCantidadTickets === undefined)
-    {
-      await mostrarMensaje('No se ha seleecionado la cantidad de entradas');
-      return;
-    }
+    const jcCantidadTickets = await seleccionar(
+      'Cantidad de entradas', [1, 2],
+      x => x.toString(),
+      x => x.toString());
+    console.log({ jcTipoTicket, jcCantidadTickets });
 
     // Agregar al carrito
     const response2 = await fetch("/Compra/AgregarMultipleTickets", {
       ...BASE_FETCH_PARAMS,
-      body: JSON.stringify({ EventoID: EVENTO, EventoCalendarioID: NUM_FECHA, CategoriaTicketID: "1", Tickets: [{ TipoTicketID: jcTipoTicket, Cantidad: jcCantidadTickets }] })
+      body: JSON.stringify({
+        EventoID: EVENTO,
+        EventoCalendarioID: NUM_FECHA,
+        CategoriaTicketID: "1",
+        Tickets: [{
+          TipoTicketID: jcTipoTicket,
+          Cantidad: jcCantidadTickets
+        }] })
     });
     const body2 = JSON.parse(await response2.text());
     if (!body2.Success)
