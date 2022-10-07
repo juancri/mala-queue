@@ -1,3 +1,3 @@
 
-[https://porostegui.com/posts/mala-queue](https://juancri.com/posts/mala-queue)
+[https://porostegui.github.io/posts/mala-queue]
 
